@@ -8,10 +8,11 @@ import {
   Body,
   Delete,
   Res,
+  Req,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { Users } from './users.model';
-import { Response } from 'express';
+import { Response , Request} from 'express';
 
 @Controller('users')
 export class UsersController {
@@ -37,25 +38,25 @@ export class UsersController {
     }
   }
 
-  @Get(':id')
-  async findOne(@Param('id') id: string, @Res() res: Response): Promise<void> {
-    try {
-      const data = await this.usersService.findById(id);
+  // @Get(':id')
+  // async findOne(@Param('id') id: string, @Res() res: Response): Promise<void> {
+  //   try {
+  //     const data = await this.usersService.findById(id);
 
-      res.status(200).json({
-        isSuccess: true,
-        message: 'success get user by id',
-        data: data,
-      });
-      return;
-    } catch (error) {
-      res.status(500).json({
-        isSuccess: false,
-        message: 'failed get user by id',
-        error: error,
-      });
-    }
-  }
+  //     res.status(200).json({
+  //       isSuccess: true,
+  //       message: 'success get user by id',
+  //       data: data,
+  //     });
+  //     return;
+  //   } catch (error) {
+  //     res.status(500).json({
+  //       isSuccess: false,
+  //       message: 'failed get user by id',
+  //       error: error,
+  //     });
+  //   }
+  // }
 
   @Post()
   async create(
@@ -99,7 +100,7 @@ export class UsersController {
     }
   }
 
-  @Post("login")
+  @Post('login')
   async login(
     @Body() createUserDto: Users,
     @Res() res: Response,
@@ -123,4 +124,24 @@ export class UsersController {
     }
   }
 
+  @Get('profile')
+  async getProfile(@Req() req : Request, @Res() res: Response) {
+    try {
+      const token = await req.headers.authorization.split(" ")[1];
+
+      console.log(token);
+      const decoded = await this.usersService.getProfile(token);
+      res.status(200).json({
+        isSuccess: true,
+        message: 'success get profile user',
+        data: decoded,
+      });
+    } catch (error) {
+      res.status(500).json({
+        isSuccess: false,
+        message: 'failed get profile user',
+        error: error,
+      });
+    }
+  }
 }
